@@ -19,7 +19,7 @@ namespace DUCK.PackageManager.Editor.UI
 			Dispatcher.Dispatch(
 				new Action(ActionTypes.REQUEST_PACKAGE_LIST_STARTED));
 
-			var task = new HttpGetRequestTask("https://api.myjson.com/bins/q2f9a");
+			var task = new HttpGetRequestTask("https://raw.githubusercontent.com/dubit/duck-packages/master/packages.json");
 			task.Execute(() =>
 			{
 				string error = null;
