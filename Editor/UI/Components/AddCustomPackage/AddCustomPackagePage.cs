@@ -13,6 +13,7 @@ namespace DUCK.PackageManager.Editor.UI.Components.AddCustomPackage
 	{
 		private TextField nameInput;
 		private TextField urlInput;
+		private TextField versionInput;
 		private Label errorLabel;
 
 		public AddCustomPackagePage()
@@ -33,6 +34,13 @@ namespace DUCK.PackageManager.Editor.UI.Components.AddCustomPackage
 			urlInput.style.Padding(4);
 			urlInput.style.fontSize = FontSizes.textInput;
 
+			var versionLabel = new Label("Version (Optional) (Git tag or branch)");
+			versionLabel.style.marginTop = 4;
+			versionInput = new TextField();
+			versionInput.style.Margin(4);
+			versionInput.style.Padding(4);
+			versionInput.style.fontSize = FontSizes.textInput;
+
 			errorLabel = new Label();
 			errorLabel.style.marginTop = 4;
 			errorLabel.style.marginBottom = 4;
@@ -47,6 +55,8 @@ namespace DUCK.PackageManager.Editor.UI.Components.AddCustomPackage
 			Add(nameInput);
 			Add(urlLabel);
 			Add(urlInput);
+			Add(versionLabel);
+			Add(versionInput);
 			Add(errorLabel);
 			Add(addButton);
 		}
@@ -87,7 +97,7 @@ namespace DUCK.PackageManager.Editor.UI.Components.AddCustomPackage
 			}
 
 			// If we get to here we can install
-			Actions.InstallCustomPackage(name, url);
+			Actions.InstallCustomPackage(name, url, versionInput.value);
 		}
 	}
 }
