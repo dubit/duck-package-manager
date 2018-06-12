@@ -74,8 +74,7 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			var args = (InstallPackageArgs) obj.Payload;
 
 			var installedPackages = InstalledPackages.Value;
-			installedPackages.Packages.Add(
-				new InstalledPackage(args.PackageName, args.Version, args.GitUrl));
+			installedPackages.Packages.Add(new InstalledPackage(args.PackageName, args.Version, args.GitUrl));
 
 			InstalledPackages.SetValue(installedPackages);
 			IsWorking.SetValue(false);
