@@ -74,6 +74,34 @@ namespace DUCK.PackageManager.Editor.UI
 			// TODO: handle errors
 		}
 
+		public static void InstallCustomPackage(string name, string url, string version = null)
+		{
+			// verify this version exists
+			// verify not already installed
+
+			var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + name;
+			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + name;
+			var args = new InstallPackageArgs(name, url, version);
+
+			Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args);
+
+			var taskChain = new TaskChain();
+
+			taskChain.Add(
+				new AddSubmoduleTask(url, relativeInstallDirectory));
+
+			if (!string.IsNullOrEmpty(version))
+			{
+				taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+			}
+
+			taskChain.Execute(() =>
+			{
+				Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
+			});
+
+			// TODO: handle errors
+		}
 		public static void RemovePackage(AvailablePackage package)
 		{
 			var installDirectory = Settings.RelativePackagesDirectoryPath + package.Name;
@@ -116,12 +144,21 @@ namespace DUCK.PackageManager.Editor.UI
 
 	public class InstallPackageArgs
 	{
-		public AvailablePackage Package { get; set; }
+		public string PackageName { get; set; }
+		public string GitUrl { get; set; }
 		public string Version { get; set; }
 
 		public InstallPackageArgs(AvailablePackage package, string version)
 		{
-			Package = package;
+			PackageName = package.Name;
+			GitUrl = package.GitUrl;
+			Version = version;
+		}
+
+		public InstallPackageArgs(string packageName, string gitUrl, string version)
+		{
+			PackageName = packageName;
+			GitUrl = gitUrl;
 			Version = version;
 		}
 	}

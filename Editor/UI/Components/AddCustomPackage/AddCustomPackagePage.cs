@@ -87,6 +87,7 @@ namespace DUCK.PackageManager.Editor.UI.Components.AddCustomPackage
 			}
 
 			// If we get to here we can install
+			Actions.InstallCustomPackage(name, url);
 		}
 	}
 }
