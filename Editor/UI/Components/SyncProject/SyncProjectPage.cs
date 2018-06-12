@@ -1,5 +1,8 @@
-﻿using DUCK.PackageManager.Editor.UI.Components;
+﻿using System;
+using DUCK.PackageManager.Editor.Git;
+using DUCK.PackageManager.Editor.Tasks;
 using DUCK.PackageManager.Editor.UI.Utils;
+using UnityEngine;
 using UnityEngine.Experimental.UIElements;
 using UnityEngine.Experimental.UIElements.StyleEnums;
 
@@ -18,11 +21,12 @@ namespace DUCK.PackageManager.Editor.UI.SyncProject
 			syncButton.Padding(8);
 			Add(syncButton);
 
-			Add(new Overlay(new LoadingIndicator("Coming Soon")));
+			// Working
 		}
 
 		private void HandleSyncButtonClicked()
 		{
+
 		}
 	}
 }

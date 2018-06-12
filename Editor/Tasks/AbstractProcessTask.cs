@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using UnityEditor;
 using Debug = UnityEngine.Debug;
@@ -9,17 +11,27 @@ namespace DUCK.PackageManager.Editor.Tasks
 	{
 		private static readonly string projectDirectory;
 
+		public bool ReceivedError
+		{
+			get { return StdError.Count > 0; }
+		}
+
+		public List<string> StdOut { get; private set; }
+		public List<string> StdError { get; private set; }
+		public string WorkingDirectory { get; set; }
+
 		static AbstractProcessTask()
 		{
 			projectDirectory = Project.RootDirectory;
 		}
 
-		protected string workingDirectory;
 		private Action onCompleteCallback;
 
 		protected AbstractProcessTask()
 		{
-			workingDirectory = projectDirectory;
+			WorkingDirectory = projectDirectory;
+			StdOut = new List<string>();
+			StdError = new List<string>();
 		}
 
 		public void Execute(Action onComplete = null)
@@ -30,40 +42,42 @@ namespace DUCK.PackageManager.Editor.Tasks
 
 		protected void RunProcessWithArgs(string fileName, string args)
 		{
-			Debug.Log("Executing:: " + args);
+			Debug.Log("Executing:: " + args + "\r\nFrom " + WorkingDirectory);
 
-			var process = new Process();
-
-			try
+			using (var process = new Process())
 			{
-				var gitInfo = new ProcessStartInfo
+				try
 				{
-					CreateNoWindow = true,
-					RedirectStandardError = true,
-					RedirectStandardOutput = true,
-					FileName = fileName,
-					UseShellExecute = false,
-					Arguments = args,
-					WorkingDirectory = workingDirectory,
-				};
+					var gitInfo = new ProcessStartInfo
+					{
+						CreateNoWindow = true,
+						RedirectStandardError = true,
+						RedirectStandardOutput = true,
+						FileName = fileName,
+						UseShellExecute = false,
+						Arguments = args,
+						WorkingDirectory = WorkingDirectory,
+					};
 
-				process.StartInfo = gitInfo;
-				process.Start();
-				process.EnableRaisingEvents = true;
-				process.Exited += HandleGitProcessExited;
-				process.OutputDataReceived += HandleGitProcessOutputDataReceived;
-				process.ErrorDataReceived += HandleGitProcessErrorDataReceived;
-				process.BeginOutputReadLine();
-				process.BeginErrorReadLine();
-			}
-			catch (Exception e)
-			{
-				Debug.LogError(e);
-				throw;
-			}
-			finally
-			{
-				process.Dispose();
+					process.StartInfo = gitInfo;
+					process.Start();
+					process.BeginOutputReadLine();
+					process.BeginErrorReadLine();
+					process.EnableRaisingEvents = true;
+					process.Exited += HandleGitProcessExited;
+					process.OutputDataReceived += HandleGitProcessOutputDataReceived;
+					process.ErrorDataReceived += HandleGitProcessErrorDataReceived;
+					process.WaitForExit();
+				}
+				catch (Exception e)
+				{
+					Debug.LogError(e);
+					throw;
+				}
+				finally
+				{
+					process.Dispose();
+				}
 			}
 		}
 
@@ -72,6 +86,7 @@ namespace DUCK.PackageManager.Editor.Tasks
 			if (!string.IsNullOrEmpty(e.Data))
 			{
 				Debug.LogError(e.Data);
+				StdError.Add(e.Data);
 			}
 		}
 
@@ -80,6 +95,7 @@ namespace DUCK.PackageManager.Editor.Tasks
 			if (!string.IsNullOrEmpty(e.Data))
 			{
 				Debug.Log(e.Data);
+				StdOut.Add(e.Data);
 			}
 		}
 

@@ -7,7 +7,7 @@
 		public CheckoutSubmoduleTask(string installDirectory, string version) :
 			base(string.Format(COMMAND, version))
 		{
-			workingDirectory = installDirectory;
+			WorkingDirectory = installDirectory;
 		}
 	}
 }
