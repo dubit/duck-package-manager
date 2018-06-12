@@ -2,7 +2,7 @@
 
 namespace DUCK.PackageManager.Editor.UI.Stores
 {
-	public class TabPageStore
+	internal class TabPageStore
 	{
 		public IState<string> CurrentPage { get; private set; }
 

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DUCK.PackageManager.Editor.UI.Stores
 {
-	public class PackageStore
+	internal class PackageStore
 	{
 		public IState<bool> IsFetchingPackages { get; private set; }
 		public IState<AvailablePackageList> AvailablePackages { get; set; }

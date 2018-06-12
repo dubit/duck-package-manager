@@ -4,7 +4,7 @@ using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class TabBar : VisualElement
+	internal class TabBar : VisualElement
 	{
 		private TabButton[] tabs;
 		private TabButton activeTab;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace DUCK.PackageManager.Editor
 {
-	public static class TestFunctions
+	internal static class TestFunctions
 	{
 		[MenuItem("DUCK/Packages/Git Submodule Add")]
 		public static void AddSubmodule()

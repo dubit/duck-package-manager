@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DUCK.PackageManager.Editor
 {
-	public static class Settings
+	internal static class Settings
 	{
 		public const string VERSION = "0.1.0 (preview)";
 

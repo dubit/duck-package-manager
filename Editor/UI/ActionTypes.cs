@@ -1,6 +1,6 @@
 ﻿namespace DUCK.PackageManager.Editor.UI
 {
-	public static class ActionTypes
+	internal static class ActionTypes
 	{
 		public const string READ_PACKAGES_JSON = "read-packages-json";
 		public const string REQUEST_PACKAGE_LIST_STARTED = "request-package-list-start";

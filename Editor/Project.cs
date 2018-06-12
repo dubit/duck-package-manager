@@ -2,7 +2,7 @@
 
 namespace DUCK.PackageManager.Editor
 {
-	public static class Project
+	internal static class Project
 	{
 		public static string RootDirectory
 		{

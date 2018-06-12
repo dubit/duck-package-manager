@@ -4,7 +4,7 @@ using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class Overlay : VisualElement
+	internal class Overlay : VisualElement
 	{
 		public Overlay(params VisualElement[] children)
 		{

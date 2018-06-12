@@ -2,7 +2,7 @@
 
 namespace DUCK.PackageManager.Editor.Tasks
 {
-	public interface ITask
+	internal interface ITask
 	{
 		void Execute(Action onComplete = null);
 	}

@@ -1,6 +1,6 @@
 ﻿namespace DUCK.PackageManager.Editor.Git
 {
-	public class CheckoutSubmoduleTask : GitTask
+	internal class CheckoutSubmoduleTask : GitTask
 	{
 		private const string COMMAND = "checkout {0}";
 

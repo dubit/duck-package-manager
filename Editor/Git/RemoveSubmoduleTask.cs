@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace DUCK.PackageManager.Editor.Git
 {
-	public class RemoveSubmoduleTask : ITask
+	internal class RemoveSubmoduleTask : ITask
 	{
 		private readonly string localRelativeSubmodulePath;
 

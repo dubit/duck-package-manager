@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DUCK.PackageManager.Editor.Preferences
 {
-	public class DuckPreferences
+	internal class DuckPreferences
 	{
 		[PreferenceItem("Duck")]
 		private static void CustomPreferencesGUI()

@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace DUCK.PackageManager.Editor.UI.Flux
 {
-	public class Action
+	internal class Action
 	{
 		public string Type { get; set; }
 		public object Payload { get; set; }

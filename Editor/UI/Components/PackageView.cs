@@ -11,7 +11,7 @@ using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class PackageView : StateBoundComponent
+	internal class PackageView : StateBoundComponent
 	{
 		private readonly PackageStore packages = RootStore.Instance.Packages;
 

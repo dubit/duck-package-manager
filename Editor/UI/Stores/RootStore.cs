@@ -1,6 +1,6 @@
 ﻿namespace DUCK.PackageManager.Editor.UI.Stores
 {
-	public class RootStore : Store
+	internal class RootStore : Store
 	{
 		private static RootStore instance;
 		public static RootStore Instance { get { return instance ?? (instance = new RootStore()); }}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DUCK.PackageManager.Editor.UI.Stores
 {
-	public abstract partial class Store
+	internal abstract partial class Store
 	{
 		private readonly Dictionary<string, List<Action<Flux.Action>>> handlers;
 		private readonly List<IStoreState> stateList;

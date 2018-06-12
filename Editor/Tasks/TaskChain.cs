@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace DUCK.PackageManager.Editor.Tasks
 {
-	public class TaskChain : ITask
+	internal class TaskChain : ITask
 	{
 		private List<ITask> tasks = new List<ITask>();
 		private Action onCompleteCallback;

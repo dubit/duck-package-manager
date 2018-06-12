@@ -4,7 +4,7 @@ using UnityEngine.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class LoadingIndicator : Label
+	internal class LoadingIndicator : Label
 	{
 		public LoadingIndicator(string text = null) : base(text)
 		{

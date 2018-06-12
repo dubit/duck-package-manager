@@ -1,13 +1,11 @@
-﻿using System.Diagnostics.SymbolStore;
-using DUCK.PackageManager.Editor.UI.Components;
+﻿using DUCK.PackageManager.Editor.UI.Components;
 using DUCK.PackageManager.Editor.UI.Utils;
-using UnityEngine;
 using UnityEngine.Experimental.UIElements;
 using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace DUCK.PackageManager.Editor.UI.SyncProject
 {
-	public class SyncProjectPage : VisualElement
+	internal class SyncProjectPage : VisualElement
 	{
 		public SyncProjectPage()
 		{

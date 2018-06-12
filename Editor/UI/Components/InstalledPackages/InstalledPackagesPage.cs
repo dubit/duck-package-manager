@@ -2,7 +2,7 @@
 
 namespace DUCK.PackageManager.Editor.UI.Components.InstalledPackages
 {
-	public class InstalledPackagesPage : VisualElement
+	internal class InstalledPackagesPage : VisualElement
 	{
 		public InstalledPackagesPage()
 		{

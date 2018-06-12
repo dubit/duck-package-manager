@@ -9,7 +9,7 @@ using UnityEngine.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class TabPageContainer : StateBoundComponent
+	internal class TabPageContainer : StateBoundComponent
 	{
 		private readonly TabPageStore tabPages = RootStore.Instance.TabPages;
 		private readonly PackageStore packages = RootStore.Instance.Packages;

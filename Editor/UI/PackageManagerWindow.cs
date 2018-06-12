@@ -8,7 +8,7 @@ using UnityEditor.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI
 {
-	public class PackageManagerWindow : EditorWindow
+	internal class PackageManagerWindow : EditorWindow
 	{
 		[MenuItem("DUCK/Package Manager")]
 		public static void ShowWindow()

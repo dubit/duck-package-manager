@@ -4,7 +4,7 @@ using UnityEngine.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI.Components.AvailablePackages
 {
-	public class AvailablePackagesPage : StateBoundComponent
+	internal class AvailablePackagesPage : StateBoundComponent
 	{
 		private readonly PackageStore packages = RootStore.Instance.Packages;
 
