@@ -19,7 +19,7 @@ namespace DUCK.PackageManager.Editor.UI
 			Dispatcher.Dispatch(
 				new Action(ActionTypes.REQUEST_PACKAGE_LIST_STARTED));
 
-			var task = new HttpGetRequestTask("https://raw.githubusercontent.com/dubit/duck-packages/master/packages.json");
+			var task = new HttpGetRequestTask(Settings.DuckPackagesUrl);
 			task.Execute(() =>
 			{
 				string error = null;
@@ -61,8 +61,7 @@ namespace DUCK.PackageManager.Editor.UI
 
 			var taskChain = new TaskChain();
 
-			taskChain.Add(
-				new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
+			taskChain.Add(new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
 
 			taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
 
@@ -70,6 +69,31 @@ namespace DUCK.PackageManager.Editor.UI
 			{
 				Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
 			});
+
+			// TODO: handle errors
+		}
+
+		public static void InstallCustomPackage(string name, string url, string version = null)
+		{
+			// verify this version exists
+			// verify not already installed
+
+			var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + name;
+			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + name;
+			var args = new InstallPackageArgs(name, url, version);
+
+			Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args);
+
+			var taskChain = new TaskChain();
+
+			taskChain.Add(new AddSubmoduleTask(url, relativeInstallDirectory));
+
+			if (!string.IsNullOrEmpty(version))
+			{
+				taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+			}
+
+			taskChain.Execute(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args); });
 
 			// TODO: handle errors
 		}
@@ -116,12 +140,21 @@ namespace DUCK.PackageManager.Editor.UI
 
 	internal class InstallPackageArgs
 	{
-		public AvailablePackage Package { get; set; }
+		public string PackageName { get; set; }
+		public string GitUrl { get; set; }
 		public string Version { get; set; }
 
 		public InstallPackageArgs(AvailablePackage package, string version)
 		{
-			Package = package;
+			PackageName = package.Name;
+			GitUrl = package.GitUrl;
+			Version = version;
+		}
+
+		public InstallPackageArgs(string packageName, string gitUrl, string version)
+		{
+			PackageName = packageName;
+			GitUrl = gitUrl;
 			Version = version;
 		}
 	}

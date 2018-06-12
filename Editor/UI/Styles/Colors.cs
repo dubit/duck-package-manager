@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Experimental.UIElements.StyleSheets;
 
 namespace DUCK.PackageManager.Editor.UI.Styles
 {
@@ -14,6 +15,7 @@ namespace DUCK.PackageManager.Editor.UI.Styles
 
 		public static readonly Color packageRowBackground = C("#878787");
 		public static readonly Color packageRowText = C("#2D2D2D");
+		public static readonly Color errorText = C("#DD0000");
 
 		private static Color C(string hex)
 		{

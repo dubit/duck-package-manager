@@ -33,6 +33,11 @@ namespace DUCK.PackageManager.Editor
 			get { return Application.dataPath + RelativePackagesJsonFilePath; }
 		}
 
+		public static string DuckPackagesUrl
+		{
+			get { return AllSettings[Keys.DUCK_PACKAGES_URL].Value; }
+		}
+
 		public static Dictionary<string, Setting> AllSettings { get; private set; }
 
 		static Settings()
@@ -42,6 +47,7 @@ namespace DUCK.PackageManager.Editor
 			AddSetting(Keys.GIT_EXECUTABLE_PATH, "C:/Program Files/Git/bin/git.exe");
 			AddSetting(Keys.PACKAGES_DIRECTORY_PATH, "Assets/Duck/Packages/");
 			AddSetting(Keys.PACKAGES_JSON_PATH, "/Duck/packages.json");
+			AddSetting(Keys.DUCK_PACKAGES_URL, "https://raw.githubusercontent.com/dubit/duck-packages/master/packages.json");
 		}
 
 		private static void AddSetting(string key, string defaultValue)
@@ -54,6 +60,7 @@ namespace DUCK.PackageManager.Editor
 			public const string GIT_EXECUTABLE_PATH = "gitExecutablePath";
 			public const string PACKAGES_DIRECTORY_PATH = "packagesDirPath";
 			public const string PACKAGES_JSON_PATH = "packagesJsonPath";
+			public const string DUCK_PACKAGES_URL = "duckPackagesUrl";
 		}
 
 		public class Setting
