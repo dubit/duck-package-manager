@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DUCK.PackageManager.Editor.Data
 {
 	[Serializable]
-	public class AvailablePackageList
+	internal class AvailablePackageList
 	{
 		[SerializeField]
 		private AvailablePackage[] packages;
@@ -15,7 +15,7 @@ namespace DUCK.PackageManager.Editor.Data
 	}
 
 	[Serializable]
-	public class AvailablePackage
+	internal class AvailablePackage
 	{
 		[SerializeField]
 		private string name;

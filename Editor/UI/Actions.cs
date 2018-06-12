@@ -12,7 +12,7 @@ using Action = DUCK.PackageManager.Editor.UI.Flux.Action;
 
 namespace DUCK.PackageManager.Editor.UI
 {
-	public static class Actions
+	internal static class Actions
 	{
 		public static void FetchPackages()
 		{
@@ -138,7 +138,7 @@ namespace DUCK.PackageManager.Editor.UI
 		}
 	}
 
-	public class InstallPackageArgs
+	internal class InstallPackageArgs
 	{
 		public string PackageName { get; set; }
 		public string GitUrl { get; set; }

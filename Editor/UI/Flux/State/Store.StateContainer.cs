@@ -1,17 +1,17 @@
 ﻿namespace DUCK.PackageManager.Editor.UI.Stores
 {
-	public interface IState
+	internal interface IState
 	{
 		object GetValue();
 	}
 
-	public interface IState<T> : IState
+	internal interface IState<T> : IState
 	{
 		T Value { get; }
 		void SetValue(T value);
 	}
 
-	public partial class Store
+	internal partial class Store
 	{
 		private interface IStoreState : IState
 		{

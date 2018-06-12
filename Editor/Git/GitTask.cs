@@ -3,7 +3,7 @@ using DUCK.PackageManager.Editor.Tasks;
 
 namespace DUCK.PackageManager.Editor.Git
 {
-	public class GitTask : AbstractProcessTask
+	internal class GitTask : AbstractProcessTask
 	{
 		public static GitTask Run(string args)
 		{

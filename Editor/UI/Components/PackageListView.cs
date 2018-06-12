@@ -6,7 +6,7 @@ using UnityEngine.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class PackageListView : StateBoundComponent
+	internal class PackageListView : StateBoundComponent
 	{
 		private readonly PackageStore packages = RootStore.Instance.Packages;
 

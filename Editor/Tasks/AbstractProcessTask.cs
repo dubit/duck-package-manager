@@ -5,7 +5,7 @@ using Debug = UnityEngine.Debug;
 
 namespace DUCK.PackageManager.Editor.Tasks
 {
-	public abstract class AbstractProcessTask : ITask
+	internal abstract class AbstractProcessTask : ITask
 	{
 		private static readonly string projectDirectory;
 

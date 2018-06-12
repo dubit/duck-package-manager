@@ -2,7 +2,7 @@
 
 namespace DUCK.PackageManager.Editor.Git
 {
-	public class AddSubmoduleTask : GitTask
+	internal class AddSubmoduleTask : GitTask
 	{
 		private const string COMMAND = "submodule add {0} {1}";
 

@@ -1,6 +1,6 @@
 ﻿namespace DUCK.PackageManager.Editor.UI
 {
-	public static class Tabs
+	internal static class Tabs
 	{
 		public const string AVAILABLE_PACKAGES = "available-packages";
 		public const string INSTALLED_PACKAGES = "installed-packages";

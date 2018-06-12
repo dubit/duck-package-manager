@@ -3,7 +3,7 @@ using UnityEngine.Experimental.UIElements.StyleSheets;
 
 namespace DUCK.PackageManager.Editor.UI.Styles
 {
-	public static class Colors
+	internal static class Colors
 	{
 		public static readonly Color background = C("#2D2D2D");
 		public static readonly Color foreground = C("#474747");

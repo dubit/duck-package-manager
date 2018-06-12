@@ -9,7 +9,7 @@ using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace DUCK.PackageManager.Editor.UI.Components.AddCustomPackage
 {
-	public class AddCustomPackagePage : VisualElement
+	internal class AddCustomPackagePage : VisualElement
 	{
 		private TextField nameInput;
 		private TextField urlInput;

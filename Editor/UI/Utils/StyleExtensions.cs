@@ -2,7 +2,7 @@
 
 namespace DUCK.PackageManager.Editor.UI.Utils
 {
-	public static class StyleExtensions
+	internal static class StyleExtensions
 	{
 		public static void Padding(this IStyle style, int padding)
 		{

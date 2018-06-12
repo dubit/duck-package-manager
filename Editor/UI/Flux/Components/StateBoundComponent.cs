@@ -5,7 +5,7 @@ using UnityEngine.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI.Flux.Components
 {
-	public abstract class StateBoundComponent : VisualElement
+	internal abstract class StateBoundComponent : VisualElement
 	{
 		private class ValueSelector
 		{

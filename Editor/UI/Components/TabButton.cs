@@ -6,7 +6,7 @@ using UnityEngine.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class TabButton : VisualElement
+	internal class TabButton : VisualElement
 	{
 		public string ID { get; set; }
 		public bool IsActive { get; set; }

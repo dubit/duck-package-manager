@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 namespace DUCK.PackageManager.Editor.Tasks.Web
 {
-	public class HttpGetRequestTask : ITask
+	internal class HttpGetRequestTask : ITask
 	{
 		public bool IsError { get { return www.isHttpError || www.isNetworkError; } }
 		public string Text { get { return www.downloadHandler.text; } }

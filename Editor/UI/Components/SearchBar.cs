@@ -7,7 +7,7 @@ using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace DUCK.PackageManager.Editor.UI.Components
 {
-	public class SearchBar : VisualElement
+	internal class SearchBar : VisualElement
 	{
 		private readonly TextField input;
 

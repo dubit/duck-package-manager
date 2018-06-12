@@ -6,7 +6,7 @@ using UnityEngine.Experimental.UIElements;
 
 namespace DUCK.PackageManager.Editor.UI.Flux
 {
-	public class FluxRootComponent : VisualElement
+	internal class FluxRootComponent : VisualElement
 	{
 		private readonly Store store;
 

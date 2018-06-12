@@ -1,6 +1,6 @@
 ﻿namespace DUCK.PackageManager.Editor.UI.Flux
 {
-	public static class Dispatcher
+	internal static class Dispatcher
 	{
 		public static event System.Action<Action> OnActionDispatched;
 
