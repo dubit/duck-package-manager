@@ -61,8 +61,7 @@ namespace DUCK.PackageManager.Editor.UI
 
 			var taskChain = new TaskChain();
 
-			taskChain.Add(
-				new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
+			taskChain.Add(new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
 
 			taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
 
@@ -87,21 +86,18 @@ namespace DUCK.PackageManager.Editor.UI
 
 			var taskChain = new TaskChain();
 
-			taskChain.Add(
-				new AddSubmoduleTask(url, relativeInstallDirectory));
+			taskChain.Add(new AddSubmoduleTask(url, relativeInstallDirectory));
 
 			if (!string.IsNullOrEmpty(version))
 			{
 				taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
 			}
 
-			taskChain.Execute(() =>
-			{
-				Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
-			});
+			taskChain.Execute(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args); });
 
 			// TODO: handle errors
 		}
+
 		public static void RemovePackage(AvailablePackage package)
 		{
 			var installDirectory = Settings.RelativePackagesDirectoryPath + package.Name;
