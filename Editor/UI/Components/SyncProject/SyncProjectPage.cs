@@ -21,7 +21,7 @@ namespace DUCK.PackageManager.Editor.UI.SyncProject
 			syncButton.Padding(8);
 			Add(syncButton);
 
-			// Working
+			//
 		}
 
 		private void HandleSyncButtonClicked()

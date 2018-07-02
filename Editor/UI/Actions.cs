@@ -5,6 +5,7 @@ using DUCK.PackageManager.Editor.Git;
 using DUCK.PackageManager.Editor.Tasks;
 using DUCK.PackageManager.Editor.Tasks.Web;
 using DUCK.PackageManager.Editor.UI.Flux;
+using DUCK.PackageManager.Editor.UI.Stores;
 using TreeEditor;
 using UnityEditor;
 using UnityEngine;
@@ -134,6 +135,38 @@ namespace DUCK.PackageManager.Editor.UI
 			task.Execute(() =>
 			{
 				Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE);
+			});
+		}
+
+		public static void CompilePackageListStatus()
+		{
+			Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED);
+
+			var tasks = new TaskChain();
+			var packageListStatus = new PackageListStatus();
+
+			foreach (var package in RootStore.Instance.Packages.InstalledPackages.Value.Packages)
+			{
+				var packageStatus = new PackageStatus();
+				packageStatus.PackageName = package.Name;
+				packageListStatus.Packages.Add(packageStatus);
+				var packageDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
+				if (!File.Exists(packageDirectory))
+				{
+					packageStatus.IsMissing = true;
+					continue;
+				}
+
+				var task = new GetGitBranchOrTagTask(package);
+				var packageVersion = package.Version;
+				tasks.Add(task);
+				tasks.Add(() => { packageStatus.IsOnWrongVersion = task.Result != packageVersion; });
+			}
+
+			tasks.Execute(() =>
+			{
+				Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE,
+					packageListStatus);
 			});
 		}
 	}

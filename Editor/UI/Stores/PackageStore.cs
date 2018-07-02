@@ -10,6 +10,7 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 		public IState<bool> IsFetchingPackages { get; private set; }
 		public IState<AvailablePackageList> AvailablePackages { get; set; }
 		public IState<InstalledPackageList> InstalledPackages { get; set; }
+		public IState<PackageListStatus> PackageListStatus { get; set; }
 		public IState<string> Error { get; set; }
 		public IState<string> SearchQuery { get; set; }
 
@@ -21,6 +22,7 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			IsFetchingPackages = store.CreateState(false);
 			AvailablePackages = store.CreateState<AvailablePackageList>(null);
 			InstalledPackages = store.CreateState(new InstalledPackageList());
+			PackageListStatus = store.CreateState<PackageListStatus>(null);
 			Error = store.CreateState<string>(null);
 			SearchQuery = store.CreateState<string>(null);
 			IsWorking = store.CreateState(false);
@@ -35,9 +37,10 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			store.Subscribe(ActionTypes.REMOVE_PACKAGE_STARTED, HandleRemovePackageStarted);
 			store.Subscribe(ActionTypes.REMOVE_PACKAGE_COMPLETE, HandleRemovePackageComplete);
 			store.Subscribe(ActionTypes.READ_PACKAGES_JSON, HandleReadPackagesJson);
-
 			store.Subscribe(ActionTypes.SWITCH_PACKAGE_VERSION_STARTED, HandleSwitchPackageVersionStarted);
 			store.Subscribe(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE, HandleSwitchPackageVersionComplete);
+			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED, HandleCompletPackageListStatusStarted);
+			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE, HandleCompletPackageListStatusComplete);
 		}
 
 		private void HandleRequestPackageListStarted(Action obj)
@@ -124,6 +127,21 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 		{
 			var jsonText = JsonUtility.ToJson(InstalledPackages.Value, true);
 			File.WriteAllText(Settings.AbsolutePackagesJsonFilePath, jsonText);
+		}
+
+		private void HandleCompletPackageListStatusStarted(Action obj)
+		{
+			PackageListStatus.SetValue(null);
+			IsWorking.SetValue(true);
+			Operation.SetValue("Compiling status of each package");
+		}
+
+		private void HandleCompletPackageListStatusComplete(Action obj)
+		{
+			IsWorking.SetValue(false);
+			Operation.SetValue(null);
+
+			PackageListStatus.SetValue((PackageListStatus) obj.Payload);
 		}
 	}
 }
