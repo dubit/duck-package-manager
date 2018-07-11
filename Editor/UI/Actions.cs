@@ -151,7 +151,7 @@ namespace DUCK.PackageManager.Editor.UI
 				packageStatus.PackageName = package.Name;
 				packageListStatus.Packages.Add(packageStatus);
 				var packageDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
-				if (!File.Exists(packageDirectory))
+				if (!Directory.Exists(packageDirectory))
 				{
 					packageStatus.IsMissing = true;
 					continue;
@@ -160,11 +160,21 @@ namespace DUCK.PackageManager.Editor.UI
 				var task = new GetGitBranchOrTagTask(package);
 				var packageVersion = package.Version;
 				tasks.Add(task);
-				tasks.Add(() => { packageStatus.IsOnWrongVersion = task.Result != packageVersion; });
+				tasks.Add(() =>
+				{
+					packageStatus.IsOnWrongVersion = task.Result != packageVersion;
+				});
 			}
 
 			tasks.Execute(() =>
 			{
+				Debug.Log("Project package status");
+
+				foreach (var package in packageListStatus.Packages)
+				{
+					Debug.Log(package);
+				}
+
 				Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE,
 					packageListStatus);
 			});

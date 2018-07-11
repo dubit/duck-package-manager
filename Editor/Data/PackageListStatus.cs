@@ -1,9 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace DUCK.PackageManager.Editor.Data
 {
 	internal class PackageListStatus
 	{
+		public bool IsProjectUpToDate
+		{
+			get { return packages.All(p => !p.IsMissing && !p.IsOnWrongVersion); }
+		}
+
 		private List<PackageStatus> packages;
 		public List<PackageStatus> Packages
 		{
@@ -21,5 +27,11 @@ namespace DUCK.PackageManager.Editor.Data
 		public string PackageName { get; set; }
 		public bool IsMissing { get; set; }
 		public bool IsOnWrongVersion { get; set; }
+
+		public override string ToString()
+		{
+			return PackageName + " is " +
+				(IsMissing ? "not installed." : (IsOnWrongVersion ? "on the wrong version." : "ok."));
+		}
 	}
 }
