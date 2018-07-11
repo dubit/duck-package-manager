@@ -27,6 +27,8 @@ namespace DUCK.PackageManager.Editor.Data
 		public string PackageName { get; set; }
 		public bool IsMissing { get; set; }
 		public bool IsOnWrongVersion { get; set; }
+		public string RequiredVersion { get; set; }
+		public string GitUrl { get; set; }
 
 		public override string ToString()
 		{

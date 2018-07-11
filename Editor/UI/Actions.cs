@@ -1,13 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using DUCK.PackageManager.Editor.Data;
 using DUCK.PackageManager.Editor.Git;
 using DUCK.PackageManager.Editor.Tasks;
 using DUCK.PackageManager.Editor.Tasks.Web;
 using DUCK.PackageManager.Editor.UI.Flux;
 using DUCK.PackageManager.Editor.UI.Stores;
-using TreeEditor;
-using UnityEditor;
 using UnityEngine;
 using Action = DUCK.PackageManager.Editor.UI.Flux.Action;
 
@@ -51,33 +50,28 @@ namespace DUCK.PackageManager.Editor.UI
 
 		public static void InstallPackage(AvailablePackage package, string version)
 		{
-			// verify this version exists
-			// verify not already installed
+			// TODO: verify this version exists
+			// TODO: verify not already installed
 
 			var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + package.Name;
 			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
 			var args = new InstallPackageArgs(package, version);
 
-			Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args);
-
 			var taskChain = new TaskChain();
 
+			taskChain.Add(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args); });
 			taskChain.Add(new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
-
 			taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
-
-			taskChain.Execute(() =>
-			{
-				Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
-			});
+			taskChain.Add(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args); });
+			taskChain.Execute();
 
 			// TODO: handle errors
 		}
 
 		public static void InstallCustomPackage(string name, string url, string version = null)
 		{
-			// verify this version exists
-			// verify not already installed
+			// TODO: verify this version exists
+			// TODO: verify not already installed
 
 			var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + name;
 			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + name;
@@ -138,7 +132,51 @@ namespace DUCK.PackageManager.Editor.UI
 			});
 		}
 
-		public static void CompilePackageListStatus()
+		public static void SyncProjectEpic()
+		{
+			CompilePackageListStatus((packageListStatus) =>
+			{
+				if (!packageListStatus.IsProjectUpToDate)
+				{
+					var taskChain = new TaskChain();
+
+					foreach (var packageStatus in packageListStatus.Packages)
+					{
+						var version = packageStatus.RequiredVersion;
+						var packageName = packageStatus.PackageName;
+						var gitUrl = packageStatus.GitUrl;
+						var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + packageName;
+						var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + packageName;
+
+						if (packageStatus.IsMissing)
+						{
+							taskChain.Add(
+								new AddSubmoduleTask(gitUrl, relativeInstallDirectory));
+							taskChain.Add(
+								new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+						}
+						else if (packageStatus.IsOnWrongVersion)
+						{
+							taskChain.Add(
+								new CheckoutSubmoduleTask(
+									absoluteInstallDirectory,
+									version));
+						}
+					}
+
+					taskChain.Execute(() =>
+					{
+						Debug.Log("Synced Project.");
+					});
+				}
+				else
+				{
+					Debug.Log("Project is already up to date.");
+				}
+			});
+		}
+
+		private static void CompilePackageListStatus(Action<PackageListStatus> onComplete)
 		{
 			Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED);
 
@@ -147,8 +185,12 @@ namespace DUCK.PackageManager.Editor.UI
 
 			foreach (var package in RootStore.Instance.Packages.InstalledPackages.Value.Packages)
 			{
-				var packageStatus = new PackageStatus();
-				packageStatus.PackageName = package.Name;
+				var packageStatus = new PackageStatus
+				{
+					RequiredVersion = package.Version,
+					PackageName = package.Name,
+					GitUrl = package.GitUrl
+				};
 				packageListStatus.Packages.Add(packageStatus);
 				var packageDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
 				if (!Directory.Exists(packageDirectory))
@@ -168,15 +210,20 @@ namespace DUCK.PackageManager.Editor.UI
 
 			tasks.Execute(() =>
 			{
-				Debug.Log("Project package status");
+				Debug.Log("Project package status: ");
 
 				foreach (var package in packageListStatus.Packages)
 				{
 					Debug.Log(package);
 				}
 
+				Debug.Log("The project is " +
+					(packageListStatus.IsProjectUpToDate ? "" : "not ")+ "up to date");
+
 				Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE,
 					packageListStatus);
+
+				onComplete(packageListStatus);
 			});
 		}
 	}
