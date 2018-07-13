@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DUCK.PackageManager.Tasks.Extensions
+namespace DUCK.Tasks.Extensions
 {
 	public static class AsyncOperationExtensions
 	{

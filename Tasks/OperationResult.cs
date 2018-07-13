@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DUCK.PackageManager.Tasks
+namespace DUCK.Tasks
 {
 	public class OperationResult
 	{

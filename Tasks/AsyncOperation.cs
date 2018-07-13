@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DUCK.PackageManager.Tasks
+namespace DUCK.Tasks
 {
 	public interface IOperationControls
 	{

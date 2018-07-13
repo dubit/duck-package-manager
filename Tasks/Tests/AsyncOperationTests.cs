@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace DUCK.PackageManager.Tasks.Tests
+namespace DUCK.Tasks.Tests
 {
 	public class AsyncOperationTests
 	{
