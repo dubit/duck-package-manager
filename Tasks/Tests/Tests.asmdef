@@ -1,6 +1,8 @@
 {
-    "name": "Duck.PackageManager",
-    "references": [],
+    "name": "TasksTests",
+    "references": [
+        "Tasks"
+    ],
     "optionalUnityReferences": [
         "TestAssemblies"
     ],
