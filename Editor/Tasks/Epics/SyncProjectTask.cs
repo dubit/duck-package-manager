@@ -69,10 +69,7 @@ namespace DUCK.Tasks.Epics
 				}
 			}
 
-			operation.Execute(() =>
-			{
-				Debug.Log("Synced Project.");
-			});
+			operation.Execute(onComplete);
 		}
 	}
 }
