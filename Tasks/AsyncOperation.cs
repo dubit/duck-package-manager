@@ -20,7 +20,6 @@ namespace DUCK.Tasks
 		{
 			if (isRunning) throw new InvalidOperationException("Cannot call Add during execution");
 			if (task == null) throw new ArgumentNullException("task");
-			if (processResult == null) throw new ArgumentNullException("processResult");
 			tasks.Add(new TaskRunner<TResult>(task, processResult));
 		}
 
@@ -113,7 +112,10 @@ namespace DUCK.Tasks
 					op.Fail(result.Error);
 				}
 
-				processResult(result, op);
+				if (processResult != null)
+				{
+					processResult(result, op);
+				}
 
 				if (!result.IsError)
 				{
