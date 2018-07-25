@@ -16,7 +16,7 @@ namespace DUCK.Tasks
 		private Action<OperationResult> onCompleteCallbackWithData;
 		private bool isRunning;
 
-		public void Add<TResult>(ITask<TResult> task, Action<TResult, IOperationControls> processResult) where TResult : OperationResult
+		public void Add<TResult>(ITask<TResult> task, Action<TResult, IOperationControls> processResult = null) where TResult : OperationResult
 		{
 			if (isRunning) throw new InvalidOperationException("Cannot call Add during execution");
 			if (task == null) throw new ArgumentNullException("task");

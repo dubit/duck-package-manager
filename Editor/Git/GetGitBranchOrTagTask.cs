@@ -1,13 +1,11 @@
 ﻿using System;
 using DUCK.PackageManager.Editor.Data;
-using DUCK.PackageManager.Editor.Tasks;
+using DUCK.Tasks;
 
 namespace DUCK.PackageManager.Editor.Git
 {
-	internal class GetGitBranchOrTagTask : ITask
+	internal class GetGitBranchOrTagTask : ITask<Result<string>>
 	{
-		public string Result { get; private set; }
-
 		private readonly InstalledPackage package;
 
 		public GetGitBranchOrTagTask(InstalledPackage package)
@@ -15,28 +13,26 @@ namespace DUCK.PackageManager.Editor.Git
 			this.package = package;
 		}
 
-		public void Execute(Action onComplete = null)
+		public void Execute(Action<Result<string>> onComplete)
 		{
 			var workingDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
 
 			var symbolic = new GitTask("symbolic-ref -q --short HEAD");
 			symbolic.WorkingDirectory = workingDirectory;
-			symbolic.Execute(() =>
+			symbolic.Execute(symbolicResult =>
 			{
-				if (symbolic.ReceivedError || symbolic.StdOut.Count == 0)
+				if (symbolicResult.IsError || symbolicResult.StdOut.Count == 0)
 				{
 					var tags = new GitTask("describe --tags --exact-match");
 					tags.WorkingDirectory = workingDirectory;
-					tags.Execute(() =>
+					tags.Execute(tagsResult =>
 					{
-						Result = tags.StdOut[0];
-						if (onComplete != null) onComplete();
+						onComplete(new Result<string>(tagsResult.StdOut[0]));
 					});
 					return;
 				}
 
-				Result = symbolic.StdOut[0];
-				if (onComplete != null) onComplete();
+				onComplete(new Result<string>(symbolicResult.StdOut[0]));
 			});
 		}
 	}

@@ -1,28 +1,25 @@
 ﻿using System;
+using DUCK.Tasks;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace DUCK.PackageManager.Editor.Tasks.Web
 {
-	internal class HttpGetRequestTask : ITask
+	internal class HttpGetRequestTask : ITask<HttpGetRequestResult>
 	{
-		public bool IsError { get { return www.isHttpError || www.isNetworkError; } }
-		public string Text { get { return www.downloadHandler.text; } }
-		public string Error { get { return www.error; } }
 
 		private UnityWebRequest www;
-		private Action onCompleteCallback;
+		private Action<HttpGetRequestResult> onCompleteCallback;
 
 		public HttpGetRequestTask(string url)
 		{
 			www = UnityWebRequest.Get(url);
 		}
 
-		public void Execute(Action onComplete = null)
+		public void Execute(Action<HttpGetRequestResult> onComplete)
 		{
 			onCompleteCallback = onComplete;
-			www.Send();
+			www.SendWebRequest();
 			EditorApplication.update += EditorUpdate;
 		}
 
@@ -33,12 +30,27 @@ namespace DUCK.PackageManager.Editor.Tasks.Web
 				return;
 			}
 
-			if (onCompleteCallback != null)
-			{
-				onCompleteCallback();
-			}
+			onCompleteCallback(new HttpGetRequestResult(www));
 
 			EditorApplication.update -= EditorUpdate;
+		}
+	}
+
+	internal class HttpGetRequestResult : OperationResult
+	{
+		public string Text { get { return www.downloadHandler.text; } }
+
+		private readonly UnityWebRequest www;
+
+		public HttpGetRequestResult(UnityWebRequest www)
+		{
+			this.www = www;
+
+			IsError = www.isHttpError || www.isNetworkError;
+			if (IsError)
+			{
+				Error = new Error(www.responseCode.ToString(), www.error);
+			}
 		}
 	}
 }

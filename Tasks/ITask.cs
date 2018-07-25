@@ -2,7 +2,7 @@
 
 namespace DUCK.Tasks
 {
-	public interface ITask<TResult> where TResult : OperationResult
+	public interface ITask<TResult>
 	{
 		void Execute(Action<TResult> onComplete);
 	}

@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
+using DUCK.Tasks;
 using UnityEditor;
 using Debug = UnityEngine.Debug;
 
 namespace DUCK.PackageManager.Editor.Tasks
 {
-	internal abstract class AbstractProcessTask : ITask
+	internal abstract class AbstractProcessTask : ITask<ProcessTaskResult>
 	{
 		private static readonly string projectDirectory;
 
-		public bool ReceivedError
-		{
-			get { return StdError.Count > 0; }
-		}
+		private readonly List<string> stdOut;
+		private readonly List<string> stdErr;
 
-		public List<string> StdOut { get; private set; }
-		public List<string> StdError { get; private set; }
 		public string WorkingDirectory { get; set; }
 
 		static AbstractProcessTask()
@@ -25,16 +21,18 @@ namespace DUCK.PackageManager.Editor.Tasks
 			projectDirectory = Project.RootDirectory;
 		}
 
-		private Action onCompleteCallback;
+		private Action<ProcessTaskResult> onCompleteCallback;
+		private Process process;
+		private int exitCode;
 
 		protected AbstractProcessTask()
 		{
 			WorkingDirectory = projectDirectory;
-			StdOut = new List<string>();
-			StdError = new List<string>();
+			stdOut = new List<string>();
+			stdErr = new List<string>();
 		}
 
-		public void Execute(Action onComplete = null)
+		public void Execute(Action<ProcessTaskResult> onComplete)
 		{
 			onCompleteCallback = onComplete;
 			Run();
@@ -42,42 +40,37 @@ namespace DUCK.PackageManager.Editor.Tasks
 
 		protected void RunProcessWithArgs(string fileName, string args)
 		{
-			Debug.Log("Executing:: " + args + "\r\nFrom " + WorkingDirectory);
+			Debug.Log("Executing: " + args + "\r\nFrom " + WorkingDirectory);
 
-			using (var process = new Process())
+			process = new Process();
+
+			try
 			{
-				try
+				var gitInfo = new ProcessStartInfo
 				{
-					var gitInfo = new ProcessStartInfo
-					{
-						CreateNoWindow = true,
-						RedirectStandardError = true,
-						RedirectStandardOutput = true,
-						FileName = fileName,
-						UseShellExecute = false,
-						Arguments = args,
-						WorkingDirectory = WorkingDirectory,
-					};
+					CreateNoWindow = true,
+					RedirectStandardError = true,
+					RedirectStandardOutput = true,
+					FileName = fileName,
+					UseShellExecute = false,
+					Arguments = args,
+					WorkingDirectory = WorkingDirectory,
+				};
 
-					process.StartInfo = gitInfo;
-					process.Start();
-					process.BeginOutputReadLine();
-					process.BeginErrorReadLine();
-					process.EnableRaisingEvents = true;
-					process.Exited += HandleGitProcessExited;
-					process.OutputDataReceived += HandleGitProcessOutputDataReceived;
-					process.ErrorDataReceived += HandleGitProcessErrorDataReceived;
-					process.WaitForExit();
-				}
-				catch (Exception e)
-				{
-					Debug.LogError(e);
-					throw;
-				}
-				finally
-				{
-					process.Dispose();
-				}
+				process.StartInfo = gitInfo;
+				process.Start();
+				process.BeginOutputReadLine();
+				process.BeginErrorReadLine();
+				process.EnableRaisingEvents = true;
+				process.Exited += HandleGitProcessExited;
+				process.OutputDataReceived += HandleGitProcessOutputDataReceived;
+				process.ErrorDataReceived += HandleGitProcessErrorDataReceived;
+			}
+			catch (Exception e)
+			{
+				Debug.LogError(e);
+				onCompleteCallback(new ProcessTaskResult(e));
+				process.Dispose();
 			}
 		}
 
@@ -85,8 +78,7 @@ namespace DUCK.PackageManager.Editor.Tasks
 		{
 			if (!string.IsNullOrEmpty(e.Data))
 			{
-				Debug.LogError(e.Data);
-				StdError.Add(e.Data);
+				stdErr.Add(e.Data);
 			}
 		}
 
@@ -94,22 +86,52 @@ namespace DUCK.PackageManager.Editor.Tasks
 		{
 			if (!string.IsNullOrEmpty(e.Data))
 			{
-				Debug.Log(e.Data);
-				StdOut.Add(e.Data);
+				stdOut.Add(e.Data);
 			}
 		}
 
 		private void HandleGitProcessExited(object sender, EventArgs eventArgs)
 		{
-			EditorApplication.update += EditorUpdate;
+			// Allow this to happen on next frame
+			EditorApplication.update += NextFrame;
+			exitCode = process.ExitCode;
+			Debug.Log("Exit code: " + exitCode);
+			process.Dispose();
 		}
 
-		private void EditorUpdate()
+		private void NextFrame()
 		{
-			EditorApplication.update -= EditorUpdate;
-			if (onCompleteCallback != null) onCompleteCallback();
+			EditorApplication.update -= NextFrame;
+			onCompleteCallback(new ProcessTaskResult(stdOut, stdErr, exitCode));
 		}
 
 		protected abstract void Run();
+	}
+
+	internal class ProcessTaskResult : OperationResult
+	{
+		public List<string> StdErr { get; private set; }
+		public List<string> StdOut { get; private set; }
+		public int ExitCode { get; private set; }
+
+		public ProcessTaskResult(List<string> stdOut, List<string> stdErr, int exitCode)
+		{
+			StdOut = stdOut;
+			StdErr = stdErr;
+			ExitCode = exitCode;
+			if (exitCode != 0)
+			{
+				Err(exitCode.ToString(),
+					string.Format("Received exit code {0} from process", exitCode),
+					exitCode);
+			}
+		}
+
+		public ProcessTaskResult(Exception error)
+		{
+			StdOut = new List<string>();
+			StdErr = new List<string>();
+			Err(error);
+		}
 	}
 }

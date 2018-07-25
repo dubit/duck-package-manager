@@ -13,6 +13,12 @@ namespace DUCK.Tasks
 			Error = error;
 		}
 
+		public void Err(Exception exception)
+		{
+			IsError = true;
+			Error = new Error(exception);
+		}
+
 		public void Err(string id, string message, object data = null)
 		{
 			IsError = true;
@@ -35,6 +41,13 @@ namespace DUCK.Tasks
 		public string ID { get; set; }
 		public string Message { get; set; }
 		public object Data { get; set; }
+
+		public Error(Exception exception)
+		{
+			ID = "exception-occurred";
+			Message = exception.Message;
+			Data = exception;
+		}
 
 		public Error(string id, string message, object data = null)
 		{

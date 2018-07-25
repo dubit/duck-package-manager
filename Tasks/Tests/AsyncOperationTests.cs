@@ -43,13 +43,7 @@ namespace DUCK.Tasks.Tests
 			Assert.Throws<ArgumentNullException>(() =>
 			{
 				var operation = new AsyncOperation();
-				operation.Add<OperationResult>(null, (result, op) => {});
-			});
-
-			Assert.Throws<ArgumentNullException>(() =>
-			{
-				var operation = new AsyncOperation();
-				operation.Add(new TestTask<int>(), null);
+				operation.Add<OperationResult>(null);
 			});
 		}
 
@@ -108,14 +102,11 @@ namespace DUCK.Tasks.Tests
 			var task2 = new TestTask<int>(2){ Fails = true };
 			var task3 = new TestTask<int>(3);
 
-			Action<Result<int>, IOperationControls> processResult = (result, op) =>
-			{
-			};
 
 			var operation = new AsyncOperation();
-			operation.Add(task1, processResult);
-			operation.Add(task2, processResult);
-			operation.Add(task3, processResult);
+			operation.Add(task1);
+			operation.Add(task2);
+			operation.Add(task3);
 
 			OperationResult overallResult = null;
 
@@ -137,14 +128,10 @@ namespace DUCK.Tasks.Tests
 			var task2 = new TestTask<int>(2);
 			var task3 = new TestTask<int>(3);
 
-			Action<Result<int>, IOperationControls> processResult = (result, op) =>
-			{
-			};
-
 			var operation = new AsyncOperation();
-			operation.Add(task1, processResult);
+			operation.Add(task1);
 			operation.Add(task2, (result, op) => { op.Fail(new Error("test-error", "Error"));});
-			operation.Add(task3, processResult);
+			operation.Add(task3);
 
 			OperationResult overallResult = null;
 
@@ -166,18 +153,14 @@ namespace DUCK.Tasks.Tests
 			var task2 = new TestTask<int>(2);
 			var task3 = new TestTask<int>(3);
 
-			Action<Result<int>, IOperationControls> processResult = (result, op) =>
-			{
-			};
-
 			var operation = new AsyncOperation();
-			operation.Add(task1, processResult);
+			operation.Add(task1);
 			operation.Add(task2, (result, op) =>
 			{
 				var finalResult = new Result<string>("done");
 				op.Complete(finalResult);
 			});
-			operation.Add(task3, processResult);
+			operation.Add(task3);
 
 			Result<string> overallResult = null;
 

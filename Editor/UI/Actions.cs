@@ -1,14 +1,15 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using DUCK.PackageManager.Editor.Data;
 using DUCK.PackageManager.Editor.Git;
-using DUCK.PackageManager.Editor.Tasks;
 using DUCK.PackageManager.Editor.Tasks.Web;
 using DUCK.PackageManager.Editor.UI.Flux;
-using DUCK.PackageManager.Editor.UI.Stores;
+using DUCK.Tasks;
+using DUCK.Tasks.Epics;
+using DUCK.Tasks.Extensions;
 using UnityEngine;
 using Action = DUCK.PackageManager.Editor.UI.Flux.Action;
+using AsyncOperation = DUCK.Tasks.AsyncOperation;
 
 namespace DUCK.PackageManager.Editor.UI
 {
@@ -20,17 +21,19 @@ namespace DUCK.PackageManager.Editor.UI
 				new Action(ActionTypes.REQUEST_PACKAGE_LIST_STARTED));
 
 			var task = new HttpGetRequestTask(Settings.DuckPackagesUrl);
-			task.Execute(() =>
+			task.Execute(result =>
 			{
 				string error = null;
-				if (!task.IsError)
+				if (!result.IsError)
 				{
 					try
 					{
-						var packageList = JsonUtility.FromJson<AvailablePackageList>(task.Text);
+						var packageList = JsonUtility.FromJson<AvailablePackageList>(result.Text);
 
 						Dispatcher.Dispatch(
 							new Action(ActionTypes.REQUEST_PACKAGE_LIST_COMPLETED, packageList));
+
+						return;
 					}
 					catch (Exception e)
 					{
@@ -40,7 +43,7 @@ namespace DUCK.PackageManager.Editor.UI
 				}
 				else
 				{
-					error = task.Error;
+					error = result.Error.Message;
 				}
 
 				Dispatcher.Dispatch(
@@ -57,15 +60,28 @@ namespace DUCK.PackageManager.Editor.UI
 			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
 			var args = new InstallPackageArgs(package, version);
 
-			var taskChain = new TaskChain();
+			var operation = new AsyncOperation();
 
-			taskChain.Add(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args); });
-			taskChain.Add(new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
-			taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
-			taskChain.Add(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args); });
-			taskChain.Execute();
+			operation.AddSync(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args); });
 
-			// TODO: handle errors
+			operation.Add(new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
+
+			operation.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+
+			operation.Execute(result =>
+			{
+				if (result.IsError)
+				{
+					Debug.LogError("Error installing package");
+					Debug.LogError(result.Error.Message);
+
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_FAILED);
+				}
+				else
+				{
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
+				}
+			});
 		}
 
 		public static void InstallCustomPackage(string name, string url, string version = null)
@@ -79,18 +95,29 @@ namespace DUCK.PackageManager.Editor.UI
 
 			Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args);
 
-			var taskChain = new TaskChain();
+			var operation = new AsyncOperation();
 
-			taskChain.Add(new AddSubmoduleTask(url, relativeInstallDirectory));
+			operation.Add(new AddSubmoduleTask(url, relativeInstallDirectory));
 
 			if (!string.IsNullOrEmpty(version))
 			{
-				taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+				operation.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
 			}
 
-			taskChain.Execute(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args); });
+			operation.Execute(result =>
+			{
+				if (result.IsError)
+				{
+					Debug.LogError("Error installing package");
+					Debug.LogError(result.Error.Message);
 
-			// TODO: handle errors
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_FAILED);
+				}
+				else
+				{
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
+				}
+			});
 		}
 
 		public static void RemovePackage(AvailablePackage package)
@@ -99,10 +126,20 @@ namespace DUCK.PackageManager.Editor.UI
 
 			Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_STARTED, package);
 
-			var task = new RemoveSubmoduleTask(installDirectory);
-			task.Execute(() =>
+			var task = ActionEpics.RemoveSubmodule(installDirectory);
+			task.Execute(result =>
 			{
-				Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_COMPLETE, package);
+				if (result.IsError)
+				{
+					Debug.LogError("Failed to removed submodule: " + installDirectory);
+					Debug.LogError(result.Error.Message);
+					Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_FAILED);
+				}
+				else
+				{
+					Debug.Log("Successfully removed submodule: " + installDirectory);
+					Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_COMPLETE, package);
+				}
 			});
 		}
 
@@ -126,104 +163,57 @@ namespace DUCK.PackageManager.Editor.UI
 			Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_STARTED);
 
 			var task = new CheckoutSubmoduleTask(absoluteInstallDirectory, version);
-			task.Execute(() =>
+			task.Execute(result =>
 			{
-				Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE);
-			});
-		}
-
-		public static void SyncProjectEpic()
-		{
-			CompilePackageListStatus((packageListStatus) =>
-			{
-				if (!packageListStatus.IsProjectUpToDate)
+				if (result.IsError)
 				{
-					var taskChain = new TaskChain();
-
-					foreach (var packageStatus in packageListStatus.Packages)
-					{
-						var version = packageStatus.RequiredVersion;
-						var packageName = packageStatus.PackageName;
-						var gitUrl = packageStatus.GitUrl;
-						var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + packageName;
-						var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + packageName;
-
-						if (packageStatus.IsMissing)
-						{
-							taskChain.Add(
-								new AddSubmoduleTask(gitUrl, relativeInstallDirectory));
-							taskChain.Add(
-								new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
-						}
-						else if (packageStatus.IsOnWrongVersion)
-						{
-							taskChain.Add(
-								new CheckoutSubmoduleTask(
-									absoluteInstallDirectory,
-									version));
-						}
-					}
-
-					taskChain.Execute(() =>
-					{
-						Debug.Log("Synced Project.");
-					});
+					Debug.LogError("Failed to switch package version: " + package.Name + "@" + version);
+					Debug.LogError(result.Error.Message);
+					Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_FAILED);
 				}
 				else
 				{
-					Debug.Log("Project is already up to date.");
+					Debug.Log("Switched package: " + package.Name + " to version: " + version);
+					Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE);
 				}
 			});
 		}
 
-		private static void CompilePackageListStatus(Action<PackageListStatus> onComplete)
+		public static void SyncProject()
+		{
+			var tasks = ActionEpics.SyncProject();
+			tasks.Execute(result =>
+			{
+				if (result.IsError)
+				{
+					Debug.LogError("Failed to sync project");
+					Debug.LogError(result.Error.Message);
+				}
+				else
+				{
+					Debug.Log("Project sync completed, the project is now up to date.");
+				}
+			});
+		}
+
+		private static void CompilePackageListStatus()
 		{
 			Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED);
 
-			var tasks = new TaskChain();
-			var packageListStatus = new PackageListStatus();
-
-			foreach (var package in RootStore.Instance.Packages.InstalledPackages.Value.Packages)
+			var tasks = ActionEpics.CompilePackageListStatus();
+			tasks.Execute(result =>
 			{
-				var packageStatus = new PackageStatus
+				if (result.IsError)
 				{
-					RequiredVersion = package.Version,
-					PackageName = package.Name,
-					GitUrl = package.GitUrl
-				};
-				packageListStatus.Packages.Add(packageStatus);
-				var packageDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
-				if (!Directory.Exists(packageDirectory))
-				{
-					packageStatus.IsMissing = true;
-					continue;
+					Debug.LogError("Failed to compile package status");
+					Debug.LogError(result.Error.Message);
 				}
-
-				var task = new GetGitBranchOrTagTask(package);
-				var packageVersion = package.Version;
-				tasks.Add(task);
-				tasks.Add(() =>
+				else
 				{
-					packageStatus.IsOnWrongVersion = task.Result != packageVersion;
-				});
-			}
-
-			tasks.Execute(() =>
-			{
-				Debug.Log("Project package status: ");
-
-				foreach (var package in packageListStatus.Packages)
-				{
-					Debug.Log(package);
+					var packageListStatus = ((Result<PackageListStatus>) result).Data;
+					Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE,
+						packageListStatus);
 				}
-
-				Debug.Log("The project is " +
-					(packageListStatus.IsProjectUpToDate ? "" : "not ")+ "up to date");
-
-				Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE,
-					packageListStatus);
-
-				onComplete(packageListStatus);
 			});
 		}
 	}

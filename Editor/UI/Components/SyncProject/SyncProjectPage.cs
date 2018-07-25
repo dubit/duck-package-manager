@@ -35,7 +35,7 @@ namespace DUCK.PackageManager.Editor.UI.SyncProject
 
 		private void HandleSyncButtonClicked()
 		{
-			Actions.SyncProjectEpic();
+			Actions.SyncProject();
 		}
 
 		protected override VisualElement[] Render()
