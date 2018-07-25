@@ -43,38 +43,38 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE, HandleCompilePackageListStatusComplete);
 		}
 
-		private void HandleRequestPackageListStarted(Action obj)
+		private void HandleRequestPackageListStarted(Action action)
 		{
 			IsFetchingPackages.SetValue(true);
 		}
 
-		private void HandleRequestPackageListCompleted(Action obj)
+		private void HandleRequestPackageListCompleted(Action action)
 		{
 			IsFetchingPackages.SetValue(false);
-			AvailablePackages.SetValue((AvailablePackageList)obj.Payload);
+			AvailablePackages.SetValue((AvailablePackageList) action.Payload);
 		}
 
-		private void HandleRequestPackageListFailed(Action obj)
+		private void HandleRequestPackageListFailed(Action action)
 		{
 			IsFetchingPackages.SetValue(false);
-			Error.SetValue((string)obj.Payload);
+			Error.SetValue((string) action.Payload);
 		}
 
-		private void HandlePackageListSearchChanged(Action obj)
+		private void HandlePackageListSearchChanged(Action action)
 		{
-			SearchQuery.SetValue((string)obj.Payload);
+			SearchQuery.SetValue((string) action.Payload);
 		}
 
-		private void HandlePackageInstallationStarted(Action obj)
+		private void HandlePackageInstallationStarted(Action action)
 		{
-			var args = (InstallPackageArgs) obj.Payload;
+			var args = (InstallPackageArgs) action.Payload;
 			IsWorking.SetValue(true);
 			Operation.SetValue("Installing " + args.PackageName + "...");
 		}
 
-		private void HandlePackageInstallationComplete(Action obj)
+		private void HandlePackageInstallationComplete(Action action)
 		{
-			var args = (InstallPackageArgs) obj.Payload;
+			var args = (InstallPackageArgs) action.Payload;
 
 			var installedPackages = InstalledPackages.Value;
 			installedPackages.Packages.Add(new InstalledPackage(args.PackageName, args.Version, args.GitUrl));
@@ -86,20 +86,20 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			WritePackagesJson();
 		}
 
-		private void HandleReadPackagesJson(Action obj)
+		private void HandleReadPackagesJson(Action action)
 		{
-			InstalledPackages.SetValue((InstalledPackageList)obj.Payload);
+			InstalledPackages.SetValue((InstalledPackageList) action.Payload);
 		}
 
-		private void HandleRemovePackageStarted(Action obj)
+		private void HandleRemovePackageStarted(Action action)
 		{
 			IsWorking.SetValue(true);
-			Operation.SetValue("Removing " + ((AvailablePackage)obj.Payload).Name + "...");
+			Operation.SetValue("Removing " + ((AvailablePackage) action.Payload).Name + "...");
 		}
 
-		private void HandleRemovePackageComplete(Action obj)
+		private void HandleRemovePackageComplete(Action action)
 		{
-			var package = (AvailablePackage) obj.Payload;
+			var package = (AvailablePackage) action.Payload;
 
 			IsWorking.SetValue(false);
 			Operation.SetValue(null);
@@ -111,13 +111,13 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			WritePackagesJson();
 		}
 
-		private void HandleSwitchPackageVersionStarted(Action obj)
+		private void HandleSwitchPackageVersionStarted(Action action)
 		{
 			IsWorking.SetValue(true);
 			Operation.SetValue("Switching package version");
 		}
 
-		private void HandleSwitchPackageVersionComplete(Action obj)
+		private void HandleSwitchPackageVersionComplete(Action action)
 		{
 			IsWorking.SetValue(false);
 			Operation.SetValue(null);
@@ -129,19 +129,19 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			File.WriteAllText(Settings.AbsolutePackagesJsonFilePath, jsonText);
 		}
 
-		private void HandleCompilePackageListStatusStarted(Action obj)
+		private void HandleCompilePackageListStatusStarted(Action action)
 		{
 			PackageListStatus.SetValue(null);
 			IsWorking.SetValue(true);
 			Operation.SetValue("Compiling status of each package");
 		}
 
-		private void HandleCompilePackageListStatusComplete(Action obj)
+		private void HandleCompilePackageListStatusComplete(Action action)
 		{
 			IsWorking.SetValue(false);
 			Operation.SetValue(null);
 
-			PackageListStatus.SetValue((PackageListStatus) obj.Payload);
+			PackageListStatus.SetValue((PackageListStatus) action.Payload);
 		}
 	}
 }
