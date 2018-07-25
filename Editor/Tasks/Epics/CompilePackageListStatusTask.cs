@@ -52,6 +52,9 @@ namespace DUCK.Tasks.Epics
 					(packageListStatus.IsProjectUpToDate ? "" : "not ")+ "up to date");
 
 				return new Result<PackageListStatus>(packageListStatus);
+			}, (result, op) =>
+			{
+				op.Complete(result);
 			});
 
 			return operation;
