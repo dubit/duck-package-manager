@@ -39,8 +39,8 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			store.Subscribe(ActionTypes.READ_PACKAGES_JSON, HandleReadPackagesJson);
 			store.Subscribe(ActionTypes.SWITCH_PACKAGE_VERSION_STARTED, HandleSwitchPackageVersionStarted);
 			store.Subscribe(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE, HandleSwitchPackageVersionComplete);
-			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED, HandleCompletPackageListStatusStarted);
-			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE, HandleCompletPackageListStatusComplete);
+			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED, HandleCompilePackageListStatusStarted);
+			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE, HandleCompilePackageListStatusComplete);
 		}
 
 		private void HandleRequestPackageListStarted(Action obj)
@@ -129,14 +129,14 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			File.WriteAllText(Settings.AbsolutePackagesJsonFilePath, jsonText);
 		}
 
-		private void HandleCompletPackageListStatusStarted(Action obj)
+		private void HandleCompilePackageListStatusStarted(Action obj)
 		{
 			PackageListStatus.SetValue(null);
 			IsWorking.SetValue(true);
 			Operation.SetValue("Compiling status of each package");
 		}
 
-		private void HandleCompletPackageListStatusComplete(Action obj)
+		private void HandleCompilePackageListStatusComplete(Action obj)
 		{
 			IsWorking.SetValue(false);
 			Operation.SetValue(null);
