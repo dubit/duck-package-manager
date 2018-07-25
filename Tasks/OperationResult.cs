@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace DUCK.Tasks
 {
@@ -23,6 +24,22 @@ namespace DUCK.Tasks
 		{
 			IsError = true;
 			Error = new Error(id, message, data);
+		}
+
+		public override string ToString()
+		{
+			var builder = new StringBuilder();
+			builder.Append(GetType().Name);
+			builder.Append(" | ");
+			builder.Append(IsError ? "Error: " : "Success");
+			if (IsError)
+			{
+				builder.Append(Error.Message);
+				builder.AppendLine();
+				builder.Append(Error.Data);
+			}
+
+			return builder.ToString();
 		}
 	}
 
