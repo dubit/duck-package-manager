@@ -102,7 +102,20 @@ namespace DUCK.PackageManager.Editor.Tasks
 		private void NextFrame()
 		{
 			EditorApplication.update -= NextFrame;
-			onCompleteCallback(new ProcessTaskResult(stdOut, stdErr, exitCode));
+			var result = new ProcessTaskResult(stdOut, stdErr, exitCode);
+			onCompleteCallback(HandleResult(result));
+		}
+
+		protected virtual ProcessTaskResult HandleResult(ProcessTaskResult result)
+		{
+			if (result.ExitCode != 0)
+			{
+				result.Err(result.ExitCode.ToString(),
+					string.Format("Received exit code {0} from process", result.ExitCode),
+					result.ExitCode);
+			}
+
+			return result;
 		}
 
 		protected abstract void Run();
@@ -119,12 +132,6 @@ namespace DUCK.PackageManager.Editor.Tasks
 			StdOut = stdOut;
 			StdErr = stdErr;
 			ExitCode = exitCode;
-			if (exitCode != 0)
-			{
-				Err(exitCode.ToString(),
-					string.Format("Received exit code {0} from process", exitCode),
-					exitCode);
-			}
 		}
 
 		public ProcessTaskResult(Exception error)
