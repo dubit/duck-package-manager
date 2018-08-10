@@ -22,5 +22,8 @@
 		public const string SWITCH_PACKAGE_VERSION_FAILED = "switch-package-version-failed";
 
 		public const string CHANGE_TAB_PAGE = "change-tab-page";
+
+		public const string COMPILE_PACKAGE_LIST_STATUS_STARTED = "compile-package-list-status-started";
+		public const string COMPILE_PACKAGE_LIST_STATUS_COMPLETE = "compile-package-list-status-complete";
 	}
 }

@@ -10,6 +10,7 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 		public IState<bool> IsFetchingPackages { get; private set; }
 		public IState<AvailablePackageList> AvailablePackages { get; set; }
 		public IState<InstalledPackageList> InstalledPackages { get; set; }
+		public IState<PackageListStatus> PackageListStatus { get; set; }
 		public IState<string> Error { get; set; }
 		public IState<string> SearchQuery { get; set; }
 
@@ -21,6 +22,7 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			IsFetchingPackages = store.CreateState(false);
 			AvailablePackages = store.CreateState<AvailablePackageList>(null);
 			InstalledPackages = store.CreateState(new InstalledPackageList());
+			PackageListStatus = store.CreateState<PackageListStatus>(null);
 			Error = store.CreateState<string>(null);
 			SearchQuery = store.CreateState<string>(null);
 			IsWorking = store.CreateState(false);
@@ -35,43 +37,44 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			store.Subscribe(ActionTypes.REMOVE_PACKAGE_STARTED, HandleRemovePackageStarted);
 			store.Subscribe(ActionTypes.REMOVE_PACKAGE_COMPLETE, HandleRemovePackageComplete);
 			store.Subscribe(ActionTypes.READ_PACKAGES_JSON, HandleReadPackagesJson);
-
 			store.Subscribe(ActionTypes.SWITCH_PACKAGE_VERSION_STARTED, HandleSwitchPackageVersionStarted);
 			store.Subscribe(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE, HandleSwitchPackageVersionComplete);
+			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED, HandleCompilePackageListStatusStarted);
+			store.Subscribe(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE, HandleCompilePackageListStatusComplete);
 		}
 
-		private void HandleRequestPackageListStarted(Action obj)
+		private void HandleRequestPackageListStarted(Action action)
 		{
 			IsFetchingPackages.SetValue(true);
 		}
 
-		private void HandleRequestPackageListCompleted(Action obj)
+		private void HandleRequestPackageListCompleted(Action action)
 		{
 			IsFetchingPackages.SetValue(false);
-			AvailablePackages.SetValue((AvailablePackageList)obj.Payload);
+			AvailablePackages.SetValue((AvailablePackageList) action.Payload);
 		}
 
-		private void HandleRequestPackageListFailed(Action obj)
+		private void HandleRequestPackageListFailed(Action action)
 		{
 			IsFetchingPackages.SetValue(false);
-			Error.SetValue((string)obj.Payload);
+			Error.SetValue((string) action.Payload);
 		}
 
-		private void HandlePackageListSearchChanged(Action obj)
+		private void HandlePackageListSearchChanged(Action action)
 		{
-			SearchQuery.SetValue((string)obj.Payload);
+			SearchQuery.SetValue((string) action.Payload);
 		}
 
-		private void HandlePackageInstallationStarted(Action obj)
+		private void HandlePackageInstallationStarted(Action action)
 		{
-			var args = (InstallPackageArgs) obj.Payload;
+			var args = (InstallPackageArgs) action.Payload;
 			IsWorking.SetValue(true);
 			Operation.SetValue("Installing " + args.PackageName + "...");
 		}
 
-		private void HandlePackageInstallationComplete(Action obj)
+		private void HandlePackageInstallationComplete(Action action)
 		{
-			var args = (InstallPackageArgs) obj.Payload;
+			var args = (InstallPackageArgs) action.Payload;
 
 			var installedPackages = InstalledPackages.Value;
 			installedPackages.Packages.Add(new InstalledPackage(args.PackageName, args.Version, args.GitUrl));
@@ -83,20 +86,20 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			WritePackagesJson();
 		}
 
-		private void HandleReadPackagesJson(Action obj)
+		private void HandleReadPackagesJson(Action action)
 		{
-			InstalledPackages.SetValue((InstalledPackageList)obj.Payload);
+			InstalledPackages.SetValue((InstalledPackageList) action.Payload);
 		}
 
-		private void HandleRemovePackageStarted(Action obj)
+		private void HandleRemovePackageStarted(Action action)
 		{
 			IsWorking.SetValue(true);
-			Operation.SetValue("Removing " + ((AvailablePackage)obj.Payload).Name + "...");
+			Operation.SetValue("Removing " + ((AvailablePackage) action.Payload).Name + "...");
 		}
 
-		private void HandleRemovePackageComplete(Action obj)
+		private void HandleRemovePackageComplete(Action action)
 		{
-			var package = (AvailablePackage) obj.Payload;
+			var package = (AvailablePackage) action.Payload;
 
 			IsWorking.SetValue(false);
 			Operation.SetValue(null);
@@ -108,13 +111,13 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 			WritePackagesJson();
 		}
 
-		private void HandleSwitchPackageVersionStarted(Action obj)
+		private void HandleSwitchPackageVersionStarted(Action action)
 		{
 			IsWorking.SetValue(true);
 			Operation.SetValue("Switching package version");
 		}
 
-		private void HandleSwitchPackageVersionComplete(Action obj)
+		private void HandleSwitchPackageVersionComplete(Action action)
 		{
 			IsWorking.SetValue(false);
 			Operation.SetValue(null);
@@ -124,6 +127,21 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 		{
 			var jsonText = JsonUtility.ToJson(InstalledPackages.Value, true);
 			File.WriteAllText(Settings.AbsolutePackagesJsonFilePath, jsonText);
+		}
+
+		private void HandleCompilePackageListStatusStarted(Action action)
+		{
+			PackageListStatus.SetValue(null);
+			IsWorking.SetValue(true);
+			Operation.SetValue("Compiling status of each package");
+		}
+
+		private void HandleCompilePackageListStatusComplete(Action action)
+		{
+			IsWorking.SetValue(false);
+			Operation.SetValue(null);
+
+			PackageListStatus.SetValue((PackageListStatus) action.Payload);
 		}
 	}
 }

@@ -2,13 +2,14 @@
 using System.IO;
 using DUCK.PackageManager.Editor.Data;
 using DUCK.PackageManager.Editor.Git;
-using DUCK.PackageManager.Editor.Tasks;
 using DUCK.PackageManager.Editor.Tasks.Web;
 using DUCK.PackageManager.Editor.UI.Flux;
-using TreeEditor;
-using UnityEditor;
+using DUCK.Tasks;
+using DUCK.Tasks.Epics;
+using DUCK.Tasks.Extensions;
 using UnityEngine;
 using Action = DUCK.PackageManager.Editor.UI.Flux.Action;
+using AsyncOperation = DUCK.Tasks.AsyncOperation;
 
 namespace DUCK.PackageManager.Editor.UI
 {
@@ -20,17 +21,19 @@ namespace DUCK.PackageManager.Editor.UI
 				new Action(ActionTypes.REQUEST_PACKAGE_LIST_STARTED));
 
 			var task = new HttpGetRequestTask(Settings.DuckPackagesUrl);
-			task.Execute(() =>
+			task.Execute(result =>
 			{
 				string error = null;
-				if (!task.IsError)
+				if (!result.IsError)
 				{
 					try
 					{
-						var packageList = JsonUtility.FromJson<AvailablePackageList>(task.Text);
+						var packageList = JsonUtility.FromJson<AvailablePackageList>(result.Text);
 
 						Dispatcher.Dispatch(
 							new Action(ActionTypes.REQUEST_PACKAGE_LIST_COMPLETED, packageList));
+
+						return;
 					}
 					catch (Exception e)
 					{
@@ -40,7 +43,7 @@ namespace DUCK.PackageManager.Editor.UI
 				}
 				else
 				{
-					error = task.Error;
+					error = result.Error.Message;
 				}
 
 				Dispatcher.Dispatch(
@@ -50,33 +53,41 @@ namespace DUCK.PackageManager.Editor.UI
 
 		public static void InstallPackage(AvailablePackage package, string version)
 		{
-			// verify this version exists
-			// verify not already installed
+			// TODO: verify this version exists
+			// TODO: verify not already installed
 
 			var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + package.Name;
 			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
 			var args = new InstallPackageArgs(package, version);
 
-			Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args);
+			var operation = new AsyncOperation();
 
-			var taskChain = new TaskChain();
+			operation.AddSync(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args); });
 
-			taskChain.Add(new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
+			operation.Add(new AddSubmoduleTask(package.GitUrl, relativeInstallDirectory));
 
-			taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+			operation.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
 
-			taskChain.Execute(() =>
+			operation.Execute(result =>
 			{
-				Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
-			});
+				if (result.IsError)
+				{
+					Debug.LogError("Error installing package");
+					Debug.LogError(result.Error.Message);
 
-			// TODO: handle errors
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_FAILED);
+				}
+				else
+				{
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
+				}
+			});
 		}
 
 		public static void InstallCustomPackage(string name, string url, string version = null)
 		{
-			// verify this version exists
-			// verify not already installed
+			// TODO: verify this version exists
+			// TODO: verify not already installed
 
 			var relativeInstallDirectory = Settings.RelativePackagesDirectoryPath + name;
 			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + name;
@@ -84,18 +95,29 @@ namespace DUCK.PackageManager.Editor.UI
 
 			Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_STARTED, args);
 
-			var taskChain = new TaskChain();
+			var operation = new AsyncOperation();
 
-			taskChain.Add(new AddSubmoduleTask(url, relativeInstallDirectory));
+			operation.Add(new AddSubmoduleTask(url, relativeInstallDirectory));
 
 			if (!string.IsNullOrEmpty(version))
 			{
-				taskChain.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+				operation.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
 			}
 
-			taskChain.Execute(() => { Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args); });
+			operation.Execute(result =>
+			{
+				if (result.IsError)
+				{
+					Debug.LogError("Error installing package");
+					Debug.LogError(result.Error.Message);
 
-			// TODO: handle errors
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_FAILED);
+				}
+				else
+				{
+					Dispatcher.Dispatch(ActionTypes.PACKAGE_INSTALLATION_COMPLETE, args);
+				}
+			});
 		}
 
 		public static void RemovePackage(AvailablePackage package)
@@ -104,10 +126,20 @@ namespace DUCK.PackageManager.Editor.UI
 
 			Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_STARTED, package);
 
-			var task = new RemoveSubmoduleTask(installDirectory);
-			task.Execute(() =>
+			var task = ActionEpics.RemoveSubmodule(installDirectory);
+			task.Execute(result =>
 			{
-				Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_COMPLETE, package);
+				if (result.IsError)
+				{
+					Debug.LogError("Failed to removed submodule: " + installDirectory);
+					Debug.LogError(result.Error.Message);
+					Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_FAILED);
+				}
+				else
+				{
+					Debug.Log("Successfully removed submodule: " + installDirectory);
+					Dispatcher.Dispatch(ActionTypes.REMOVE_PACKAGE_COMPLETE, package);
+				}
 			});
 		}
 
@@ -131,9 +163,57 @@ namespace DUCK.PackageManager.Editor.UI
 			Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_STARTED);
 
 			var task = new CheckoutSubmoduleTask(absoluteInstallDirectory, version);
-			task.Execute(() =>
+			task.Execute(result =>
 			{
-				Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE);
+				if (result.IsError)
+				{
+					Debug.LogError("Failed to switch package version: " + package.Name + "@" + version);
+					Debug.LogError(result.Error.Message);
+					Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_FAILED);
+				}
+				else
+				{
+					Debug.Log("Switched package: " + package.Name + " to version: " + version);
+					Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE);
+				}
+			});
+		}
+
+		public static void SyncProject()
+		{
+			var tasks = ActionEpics.SyncProject();
+			tasks.Execute(result =>
+			{
+				if (result.IsError)
+				{
+					Debug.LogError("Failed to sync project");
+					Debug.LogError(result.Error.Message);
+				}
+				else
+				{
+					Debug.Log("Project sync completed, the project is now up to date.");
+				}
+			});
+		}
+
+		private static void CompilePackageListStatus()
+		{
+			Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_STARTED);
+
+			var tasks = ActionEpics.CompilePackageListStatus();
+			tasks.Execute(result =>
+			{
+				if (result.IsError)
+				{
+					Debug.LogError("Failed to compile package status");
+					Debug.LogError(result.Error.Message);
+				}
+				else
+				{
+					var packageListStatus = ((Result<PackageListStatus>) result).Data;
+					Dispatcher.Dispatch(ActionTypes.COMPILE_PACKAGE_LIST_STATUS_COMPLETE,
+						packageListStatus);
+				}
 			});
 		}
 	}

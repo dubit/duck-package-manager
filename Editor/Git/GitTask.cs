@@ -8,7 +8,7 @@ namespace DUCK.PackageManager.Editor.Git
 		public static GitTask Run(string args)
 		{
 			var task = new GitTask(args);
-			task.Execute();
+			task.Execute(r => {});
 			return task;
 		}
 

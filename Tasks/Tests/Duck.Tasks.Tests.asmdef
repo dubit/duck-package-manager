@@ -1,5 +1,5 @@
 {
-    "name": "Duck.PackageManager",
+    "name": "Duck.Tasks.Tests",
     "references": [
         "Duck.Tasks"
     ],
