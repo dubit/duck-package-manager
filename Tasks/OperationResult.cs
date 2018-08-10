@@ -8,6 +8,13 @@ namespace DUCK.Tasks
 		public bool IsError { get; set; }
 		public Error Error { get; set; }
 
+		public void Err()
+		{
+			IsError = true;
+			Error = new Error("unknown", "An unknown error occurred");
+		}
+
+
 		public void Err(Error error)
 		{
 			IsError = true;
@@ -24,6 +31,12 @@ namespace DUCK.Tasks
 		{
 			IsError = true;
 			Error = new Error(id, message, data);
+		}
+
+		public void Err(string message, object data = null)
+		{
+			IsError = true;
+			Error = new Error("unspecified-error", message, data);
 		}
 
 		public override string ToString()
