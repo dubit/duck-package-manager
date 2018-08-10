@@ -46,7 +46,7 @@ namespace DUCK.PackageManager.Editor.Tasks
 
 			try
 			{
-				var gitInfo = new ProcessStartInfo
+				var processStartInfo = new ProcessStartInfo
 				{
 					CreateNoWindow = true,
 					RedirectStandardError = true,
@@ -57,14 +57,14 @@ namespace DUCK.PackageManager.Editor.Tasks
 					WorkingDirectory = WorkingDirectory,
 				};
 
-				process.StartInfo = gitInfo;
+				process.StartInfo = processStartInfo;
 				process.Start();
 				process.BeginOutputReadLine();
 				process.BeginErrorReadLine();
 				process.EnableRaisingEvents = true;
-				process.Exited += HandleGitProcessExited;
-				process.OutputDataReceived += HandleGitProcessOutputDataReceived;
-				process.ErrorDataReceived += HandleGitProcessErrorDataReceived;
+				process.Exited += HandleProcessExited;
+				process.OutputDataReceived += HandleProcessOutputDataReceived;
+				process.ErrorDataReceived += HandleProcessErrorDataReceived;
 			}
 			catch (Exception e)
 			{
@@ -74,7 +74,7 @@ namespace DUCK.PackageManager.Editor.Tasks
 			}
 		}
 
-		private void HandleGitProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
+		private void HandleProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
 		{
 			if (!string.IsNullOrEmpty(e.Data))
 			{
@@ -82,7 +82,7 @@ namespace DUCK.PackageManager.Editor.Tasks
 			}
 		}
 
-		private void HandleGitProcessOutputDataReceived(object sender, DataReceivedEventArgs e)
+		private void HandleProcessOutputDataReceived(object sender, DataReceivedEventArgs e)
 		{
 			if (!string.IsNullOrEmpty(e.Data))
 			{
@@ -90,7 +90,7 @@ namespace DUCK.PackageManager.Editor.Tasks
 			}
 		}
 
-		private void HandleGitProcessExited(object sender, EventArgs eventArgs)
+		private void HandleProcessExited(object sender, EventArgs eventArgs)
 		{
 			// Allow this to happen on next frame
 			EditorApplication.update += NextFrame;
