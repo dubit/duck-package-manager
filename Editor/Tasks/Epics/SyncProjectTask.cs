@@ -64,8 +64,7 @@ namespace DUCK.Tasks.Epics
 				}
 				else if (packageStatus.IsOnWrongVersion)
 				{
-					var checkoutTask = new CheckoutSubmoduleTask(absoluteInstallDirectory, version);
-					operation.Add(checkoutTask);
+					operation.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
 				}
 			}
 
