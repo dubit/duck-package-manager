@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using DUCK.PackageManager.Editor.Data;
 using DUCK.PackageManager.Editor.UI.Flux;
 using UnityEngine;
@@ -119,6 +120,16 @@ namespace DUCK.PackageManager.Editor.UI.Stores
 
 		private void HandleSwitchPackageVersionComplete(Action action)
 		{
+			var args = (SwitchPackageArgs) action.Payload;
+
+			var installedPackages = InstalledPackages.Value;
+			var package = installedPackages.Packages.FirstOrDefault(p => p.Name == args.Package.Name);
+			package.Version = args.Version;
+
+			InstalledPackages.SetValue(installedPackages);
+
+			WritePackagesJson();
+
 			IsWorking.SetValue(false);
 			Operation.SetValue(null);
 		}
