@@ -42,6 +42,7 @@ namespace DUCK.PackageManager.Editor.Data
 		public string Version
 		{
 			get { return version; }
+			set { version = value; }
 		}
 
 		public InstalledPackage(string name, string version, string gitUrl)
