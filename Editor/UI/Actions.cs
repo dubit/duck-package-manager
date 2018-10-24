@@ -158,12 +158,19 @@ namespace DUCK.PackageManager.Editor.UI
 
 		public static void SwitchVersion(AvailablePackage package, string version)
 		{
+			// TODO: Verify that this package is actually installed
+			
 			var absoluteInstallDirectory = Settings.AbsolutePackagesDirectoryPath + package.Name;
 
 			Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_STARTED);
 
-			var task = new CheckoutSubmoduleTask(absoluteInstallDirectory, version);
-			task.Execute(result =>
+			var operation = new AsyncOperation();
+			
+			operation.Add(new GitTask("fetch"){ WorkingDirectory = absoluteInstallDirectory });
+			
+			operation.Add(new CheckoutSubmoduleTask(absoluteInstallDirectory, version));
+			
+			operation.Execute(result =>
 			{
 				if (result.IsError)
 				{
@@ -174,7 +181,8 @@ namespace DUCK.PackageManager.Editor.UI
 				else
 				{
 					Debug.Log("Switched package: " + package.Name + " to version: " + version);
-					Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE);
+					Dispatcher.Dispatch(ActionTypes.SWITCH_PACKAGE_VERSION_COMPLETE, 
+						new SwitchPackageArgs(package, version));
 				}
 			});
 		}
@@ -235,6 +243,18 @@ namespace DUCK.PackageManager.Editor.UI
 		{
 			PackageName = packageName;
 			GitUrl = gitUrl;
+			Version = version;
+		}
+	}
+
+	internal class SwitchPackageArgs
+	{
+		public AvailablePackage Package { get; set; }
+		public string Version { get; set; }
+
+		public SwitchPackageArgs(AvailablePackage package, string version)
+		{
+			Package = package;
 			Version = version;
 		}
 	}
