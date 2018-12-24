@@ -21,15 +21,15 @@ namespace DUCK.PackageManager.Editor.UI.Components
 				packages.SearchQuery
 			);
 
-			style.flex = 1;
+			style.flexGrow = 1;
 
 			errorLabel = new Label();
-			errorLabel.style.flex = 1;
+			errorLabel.style.flexGrow = 1;
 			errorLabel.style.fontSize = FontSizes.infoLabel;
 			errorLabel.style.textColor = Color.red;
 
 			scrollView = new ScrollView();
-			scrollView.style.flex = 1;
+			scrollView.style.flexGrow = 1;
 			scrollView.contentContainer.style.positionRight = 0;
 			scrollView.contentContainer.style.positionLeft = 0;
 

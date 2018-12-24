@@ -39,7 +39,7 @@ namespace DUCK.PackageManager.Editor.UI.Components
 
 			packageName = new Label(package.Name);
 			packageName.style.fontSize = FontSizes.packageRow;
-			packageName.style.flex = 1;
+			packageName.style.flexGrow = 1;
 			packageName.style.textColor = Colors.packageRowText;
 
 			versionSelector = new PopupField<string>(package.Versions.ToList(), package.Versions.Last());

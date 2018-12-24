@@ -8,7 +8,7 @@ namespace DUCK.PackageManager.Editor.UI.Components
 	{
 		public LoadingIndicator(string text = null) : base(text)
 		{
-			style.flex = 1;
+			style.flexGrow = 1;
 			style.textAlignment = TextAnchor.MiddleCenter;
 			style.fontSize = FontSizes.infoLabel;
 			style.textColor = Color.white;

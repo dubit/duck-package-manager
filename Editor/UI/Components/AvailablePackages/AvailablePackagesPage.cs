@@ -14,7 +14,7 @@ namespace DUCK.PackageManager.Editor.UI.Components.AvailablePackages
 
 		public AvailablePackagesPage()
 		{
-			style.flex = 1;
+			style.flexGrow = 1;
 
 			BindToState(
 				packages.IsFetchingPackages

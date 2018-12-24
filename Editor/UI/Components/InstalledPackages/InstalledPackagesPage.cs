@@ -6,7 +6,7 @@ namespace DUCK.PackageManager.Editor.UI.Components.InstalledPackages
 	{
 		public InstalledPackagesPage()
 		{
-			style.flex = 1;
+			style.flexGrow = 1;
 			Add(new Overlay(new LoadingIndicator("Coming Soon")));
 		}
 	}

@@ -29,7 +29,7 @@ namespace DUCK.PackageManager.Editor.UI.Components
 				packages.IsWorking
 			);
 
-			style.flex = 1;
+			style.flexGrow = 1;
 			style.backgroundColor = Colors.foreground;
 
 			availablePackagesPage = new AvailablePackagesPage();
