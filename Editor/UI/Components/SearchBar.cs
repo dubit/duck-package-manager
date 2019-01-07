@@ -13,6 +13,7 @@ namespace DUCK.PackageManager.Editor.UI.Components
 
 		public SearchBar()
 		{
+			style.flex = 1;
 			style.height = 32;
 			style.flexDirection = FlexDirection.Row;
 

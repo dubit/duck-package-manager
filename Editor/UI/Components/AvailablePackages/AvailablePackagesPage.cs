@@ -1,6 +1,7 @@
 ﻿using DUCK.PackageManager.Editor.UI.Flux.Components;
 using DUCK.PackageManager.Editor.UI.Stores;
 using UnityEngine.Experimental.UIElements;
+using UnityEngine.Experimental.UIElements.StyleEnums;
 
 namespace DUCK.PackageManager.Editor.UI.Components.AvailablePackages
 {
@@ -11,6 +12,7 @@ namespace DUCK.PackageManager.Editor.UI.Components.AvailablePackages
 		private readonly SearchBar searchBar;
 		private readonly PackageListView packageListView;
 		private readonly LoadingIndicator loadingIndicator;
+		private readonly VisualElement topBar;
 
 		public AvailablePackagesPage()
 		{
@@ -25,7 +27,13 @@ namespace DUCK.PackageManager.Editor.UI.Components.AvailablePackages
 			);
 
 			loadingIndicator = new LoadingIndicator("Fetching Packages...");
-			searchBar = new SearchBar();
+			
+			// TopBar
+			topBar = new VisualElement();
+			topBar.style.height = 32;
+			topBar.style.flexDirection = FlexDirection.Row;
+			topBar.Add(new RefreshButton());
+			topBar.Add(searchBar = new SearchBar());
 			packageListView = new PackageListView();
 
 			Init();
@@ -38,7 +46,7 @@ namespace DUCK.PackageManager.Editor.UI.Components.AvailablePackages
 			return new VisualElement[]
 			{
 				isFetching ? loadingIndicator : null,
-				isFetching ? null : searchBar,
+				isFetching ? null : topBar,
 				isFetching ? null : packageListView,
 			};
 		}
