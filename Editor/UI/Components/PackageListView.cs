@@ -21,15 +21,27 @@ namespace DUCK.PackageManager.Editor.UI.Components
 				packages.SearchQuery
 			);
 
-			style.flexGrow = 1;
+#if UNITY_2018_3_OR_NEWER
+			style.flexGrow = 1f;
+#else
+			style.flex = 1f;
+#endif
 
 			errorLabel = new Label();
-			errorLabel.style.flexGrow = 1;
+#if UNITY_2018_3_OR_NEWER
+			errorLabel.style.flexGrow = 1f;
+#else
+			errorLabel.style.flex = 1;
+#endif
 			errorLabel.style.fontSize = FontSizes.infoLabel;
 			errorLabel.style.textColor = Color.red;
 
 			scrollView = new ScrollView();
-			scrollView.style.flexGrow = 1;
+#if UNITY_2018_3_OR_NEWER
+			scrollView.style.flexGrow = 1f;
+#else
+			scrollView.style.flex = 1f;
+#endif
 			scrollView.contentContainer.style.positionRight = 0;
 			scrollView.contentContainer.style.positionLeft = 0;
 

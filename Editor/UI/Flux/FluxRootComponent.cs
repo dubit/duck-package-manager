@@ -14,7 +14,11 @@ namespace DUCK.PackageManager.Editor.UI.Flux
 		public FluxRootComponent(Store rootStore)
 		{
 			store = rootStore;
-			style.flexGrow = 1;
+#if UNITY_2018_3_OR_NEWER
+			style.flexGrow = 1f;
+#else
+			style.flex = 1f;
+#endif
 			Dispatcher.OnActionDispatched += HandleDispatch;
 		}
 

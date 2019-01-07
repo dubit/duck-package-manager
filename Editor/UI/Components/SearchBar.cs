@@ -23,7 +23,11 @@ namespace DUCK.PackageManager.Editor.UI.Components
 			input = new TextField();
 			input.style.Margin(4);
 			input.style.fontSize = FontSizes.textInput;
-			input.style.flexGrow = 1;
+#if UNITY_2018_3_OR_NEWER
+			input.style.flexGrow = 1f;
+#else
+			input.style.flex = 1f;
+#endif
 
 			input.RegisterCallback<KeyUpEvent>(HandleValueChanged);
 

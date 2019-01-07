@@ -8,7 +8,11 @@ namespace DUCK.PackageManager.Editor.UI.Components
 	{
 		public LoadingIndicator(string text = null) : base(text)
 		{
-			style.flexGrow = 1;
+#if UNITY_2018_3_OR_NEWER
+			style.flexGrow = 1f;
+#else
+			style.flex = 1f;
+#endif
 			style.textAlignment = TextAnchor.MiddleCenter;
 			style.fontSize = FontSizes.infoLabel;
 			style.textColor = Color.white;
