@@ -3,6 +3,7 @@ using System.Linq;
 using DUCK.PackageManager.Editor.UI.Flux.Components;
 using DUCK.PackageManager.Editor.UI.Stores;
 using UnityEngine.Experimental.UIElements;
+using UnityEngine.Experimental.UIElements.StyleSheets;
 
 namespace DUCK.PackageManager.Editor.UI.Flux
 {
@@ -13,7 +14,11 @@ namespace DUCK.PackageManager.Editor.UI.Flux
 		public FluxRootComponent(Store rootStore)
 		{
 			store = rootStore;
-			style.flex = 1;
+#if UNITY_2018_3_OR_NEWER
+			style.flexGrow = 1f;
+#else
+			style.flex = 1f;
+#endif
 			Dispatcher.OnActionDispatched += HandleDispatch;
 		}
 

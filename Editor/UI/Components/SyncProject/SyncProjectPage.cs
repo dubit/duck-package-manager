@@ -15,7 +15,11 @@ namespace DUCK.PackageManager.Editor.UI.SyncProject
 
 		public SyncProjectPage()
 		{
-			style.flex = 1;
+#if UNITY_2018_3_OR_NEWER
+			style.flexGrow = 1f;
+#else
+			style.flex = 1f;
+#endif
 			style.alignItems = Align.Center;
 			style.paddingTop = 32;
 

@@ -13,7 +13,11 @@ namespace DUCK.PackageManager.Editor.UI.Components
 
 		public SearchBar()
 		{
-			style.flex = 1;
+#if UNITY_2018_3_OR_NEWER
+			style.flexGrow = 1f;
+#else
+			style.flex = 1f;
+#endif
 			style.height = 32;
 			style.flexDirection = FlexDirection.Row;
 
@@ -24,7 +28,11 @@ namespace DUCK.PackageManager.Editor.UI.Components
 			input = new TextField();
 			input.style.Margin(4);
 			input.style.fontSize = FontSizes.textInput;
-			input.style.flex = 1;
+#if UNITY_2018_3_OR_NEWER
+			input.style.flexGrow = 1f;
+#else
+			input.style.flex = 1f;
+#endif
 
 			input.RegisterCallback<KeyUpEvent>(HandleValueChanged);
 

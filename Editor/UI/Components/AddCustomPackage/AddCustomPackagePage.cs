@@ -18,7 +18,11 @@ namespace DUCK.PackageManager.Editor.UI.Components.AddCustomPackage
 
 		public AddCustomPackagePage()
 		{
-			style.flex = 1;
+#if UNITY_2018_3_OR_NEWER
+			style.flexGrow = 1f;
+#else
+			style.flex = 1f;
+#endif
 			style.paddingTop = 16;
 
 			var nameField = new Label("Package Name (Can be anything as long as it's unique)");

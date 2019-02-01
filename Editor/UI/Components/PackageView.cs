@@ -39,7 +39,11 @@ namespace DUCK.PackageManager.Editor.UI.Components
 
 			packageName = new Label(package.Name);
 			packageName.style.fontSize = FontSizes.packageRow;
-			packageName.style.flex = 1;
+#if UNITY_2018_3_OR_NEWER
+			packageName.style.flexGrow = 1f;
+#else
+			packageName.style.flex = 1f;
+#endif
 			packageName.style.textColor = Colors.packageRowText;
 
 			versionSelector = new PopupField<string>(package.Versions.ToList(), package.Versions.Last());

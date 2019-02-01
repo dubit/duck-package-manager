@@ -25,7 +25,11 @@ namespace DUCK.PackageManager.Editor.UI.Components
 
 			label = new Label(text);
 			label.style.fontSize = 14;
-			label.style.flex = 1;
+#if UNITY_2018_3_OR_NEWER
+			label.style.flexGrow = 1f;
+#else
+			label.style.flex = 1f;
+#endif
 			label.style.textAlignment = TextAnchor.MiddleCenter;
 
 			this.AddManipulator(new Clickable(HandleClick));
